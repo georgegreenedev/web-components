@@ -36,10 +36,13 @@ class Combobox extends HTMLElement {
   }
 
   applyStyes() {
-    this.datalist.style.border = "1px solid";
     this.datalist.style.display = "block";
-    this.datalist.style.overflow = "scroll";
+    this.datalist.style.height = "50vh";
+    this.datalist.style.overflow = "auto";
+    this.fieldset.style.border = "none";
     this.fieldset.style.display = "block";
+    this.fieldset.style.outline = "solid";
+    this.fieldset.style.width = "50vw";
     this.input.style.display = "block";
     this.input.style.width = "100%";
     this.label.style.display = "block";
