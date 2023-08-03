@@ -95,10 +95,19 @@ class Combobox extends HTMLElement {
 
     for (let i = 0; i < loremIpsumList.length; i++) {
       const option = document.createElement("li");
+      option.addEventListener("click", this.handleOptionClick);
       option.textContent = loremIpsumList[i];
       this.datalistNodes.push(option);
     }
   }
+
+  handleOptionClick = (e) => {
+    if (e.target.value) {
+      const li = document.createElement("li");
+      li.textContent = e.target.value;
+      this.selectionsUl.appendChild(li);
+    }
+  };
 
   handleKeypress = (e) => {
     if (e.key === "Enter" && this.suggestion) {
