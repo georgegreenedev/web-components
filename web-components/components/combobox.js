@@ -4,18 +4,14 @@ class Combobox extends HTMLElement {
   fieldset;
   input;
   label;
-  li;
+  option;
   shadowRoot;
-  span;
-  ul;
-
-  selectionsUl;
-  selectionsInitialLi;
+  selectionsDatalist;
+  selectionsInitialOption;
 
   constructor() {
     super();
     this.shadowRoot = this.attachShadow({ mode: "open" });
-
     this.createElements();
     this.applyAttributes();
     this.applyStyes();
@@ -30,11 +26,9 @@ class Combobox extends HTMLElement {
     this.fieldset = document.createElement("fieldset");
     this.input = document.createElement("input");
     this.label = document.createElement("label");
-    this.li = document.createElement("li");
-    this.selectionsUl = document.createElement("ul");
-    this.selectionsInitialLi = document.createElement("li");
-    this.span = document.createElement("span");
-    this.ul = document.createElement("ul");
+    this.option = document.createElement("option");
+    this.selectionsDatalist = document.createElement("datalist");
+    this.selectionsInitialOption = document.createElement("option");
   }
 
   applyAttributes() {
@@ -53,67 +47,83 @@ class Combobox extends HTMLElement {
     this.input.style.display = "block";
     this.input.style.width = "100%";
     this.label.style.display = "block";
-    this.selectionsUl.style.height = "57vh";
-    this.selectionsUl.style.margin = "0px";
-    this.selectionsUl.style.width = "25vw";
-    this.selectionsUl.style.outline = "dotted";
+    this.selectionsDatalist.style.display = "block";
+    this.selectionsDatalist.style.height = "57vh";
+    this.selectionsDatalist.style.margin = "0px";
+    this.selectionsDatalist.style.width = "25vw";
+    this.selectionsDatalist.style.outline = "dotted";
   }
 
   setContent() {
     this.label.textContent = this.getAttribute("label");
-    this.li.textContent = "list item";
-    this.selectionsInitialLi.textContent = "Selections:";
+    this.option.textContent = "list item";
+    this.selectionsInitialOption.textContent = "Selections:";
   }
 
   appendChildren() {
     this.fieldset.appendChild(this.label);
     this.fieldset.appendChild(this.input);
-
-    this.input.appendChild(this.span);
-
-    this.datalist.appendChild(this.ul);
-    this.ul.replaceChildren(...this.datalistNodes);
-
+    this.datalist.replaceChildren(...this.datalistNodes);
     this.shadowRoot.appendChild(this.fieldset);
-
-    this.selectionsUl.appendChild(this.selectionsInitialLi);
-    document.body.appendChild(this.selectionsUl);
+    this.selectionsDatalist.appendChild(this.selectionsInitialOption);
+    document.body.appendChild(this.selectionsDatalist);
   }
 
   addEventListeners() {
-    this.input.addEventListener("blur", this.collapseDatalist);
+    // this.input.addEventListener("blur", this.collapseDatalist);
     this.input.addEventListener("focus", this.expandDatalist);
     this.input.addEventListener("input", this.handleSearchInput);
     this.input.addEventListener("keypress", this.handleKeypress);
+    window.addEventListener("keydown", this.handleWindowKeydown);
+    window.addEventListener("click", (e) => console.log(e));
   }
 
   setListOptions() {
     const loremIpsum =
       "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.";
-
     const loremIpsumList = loremIpsum.split(" ");
-
     for (let i = 0; i < loremIpsumList.length; i++) {
-      const option = document.createElement("li");
+      const option = document.createElement("option");
       option.addEventListener("click", this.handleOptionClick);
       option.textContent = loremIpsumList[i];
       this.datalistNodes.push(option);
     }
   }
 
+  handleWindowKeydown = (e) => {
+    // console.log(this.shadowRoot.activeElement);
+    // console.log(this.datalist.children);
+    if (document.activeElement === document.body) {
+      // console.log("da body");
+      // this.datalist.
+    }
+    if (
+      this === document.activeElement &&
+      e.key === "ArrowDown" &&
+      this.datalist.children.length > 0
+    ) {
+      // console.log("should traverse list");
+    }
+  };
+
   handleOptionClick = (e) => {
+    // console.log(e);
     if (e.target.value) {
-      const li = document.createElement("li");
-      li.textContent = e.target.value;
-      this.selectionsUl.appendChild(li);
+      const option = document.createElement("option");
+      option.textContent = e.target.value;
+      this.selectionsDatalist.appendChild(option);
+      this.datalist.removeChild(e.target);
     }
   };
 
   handleKeypress = (e) => {
     if (e.key === "Enter" && this.suggestion) {
-      const li = document.createElement("li");
-      li.textContent = this.suggestion;
-      this.selectionsUl.appendChild(li);
+      const option = document.createElement("option");
+      option.textContent = this.suggestion;
+      this.selectionsDatalist.appendChild(option);
+      // this.datalist.removeChild(option);
+      const a = this.datalist.firstChild;
+      this.datalist.removeChild(a);
     }
   };
 
@@ -139,15 +149,19 @@ class Combobox extends HTMLElement {
   };
 
   filterDatalist = (searchValue) => {
+    console.log(searchValue);
     if (typeof searchValue === "string" && searchValue !== "") {
+      console.log("hey");
+      console.log(this.datalist.children.length);
       const matchingNodes = [];
-
-      for (let i = 0; i < this.datalistNodes.length; i++) {
-        if (this.datalistNodes[i].textContent.includes(searchValue)) {
-          matchingNodes.push(this.datalistNodes[i]);
+      for (let i = 0; i < this.datalist.children.length; i++) {
+        console.log("dude");
+        console.log(this.datalist);
+        console.log(this.datalist.children.item(i));
+        if (this.datalist.children.item(i).textContent.includes(searchValue)) {
+          matchingNodes.push(this.datalist[i]);
         }
       }
-
       if (matchingNodes.length > 0) {
         this.suggestion = matchingNodes.at(0).textContent;
       }
